@@ -42,4 +42,4 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=antonioborrelli11-coder_mergesort
-            -Dsonar.organization=mergesort-1
+            -Dsonar.organization=antonioborrelli11-coder
