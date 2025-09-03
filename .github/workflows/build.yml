@@ -20,18 +20,22 @@ jobs:
       - name: Checkout del Codice
         uses: actions/checkout@v4
       
-      # Step 2: Installa il compilatore GCC e altri strumenti essenziali per la build.
+      # Step 2: Installa gli strumenti di compilazione C
       - name: Installa gli strumenti di compilazione C
         run: sudo apt-get update && sudo apt-get install -y gcc make
 
-      # Step 3: Compila il programma C.
-      - name: Compila il programma
-        run: gcc -o main main.c
+      # Step 3: Scarica e decomprimi il build-wrapper di SonarCloud
+      - name: Scarica build-wrapper
+        shell: bash
+        run: |
+          wget https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+          unzip build-wrapper-linux-x86.zip
 
-      # Step 4: Esegui il programma compilato.
-      - name: Esegui il programma
-        run: ./main
-
+      # Step 4: Esegui la build del programma utilizzando il build-wrapper
+      - name: Esegui build con build-wrapper
+        shell: bash
+        run: ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output gcc -o main main.c
+      
       # Step 5: Analisi del codice con SonarCloud
       # Utilizza il token salvato come segreto del repository
       - name: SonarCloud Scan
@@ -43,3 +47,4 @@ jobs:
           args: >
             -Dsonar.projectKey=antonioborrelli11-coder_mergesort
             -Dsonar.organization=antonioborrelli11-coder
+            -Dsonar.cfamily.build-wrapper-output=bw-output
