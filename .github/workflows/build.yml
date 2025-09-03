@@ -41,5 +41,5 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=mergesort
+            -Dsonar.projectKey=antonioborrelli11-coder_mergesort
             -Dsonar.organization=mergesort-1
