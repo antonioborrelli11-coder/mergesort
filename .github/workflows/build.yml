@@ -36,10 +36,11 @@ jobs:
           unzip build-wrapper-linux-x86.zip
 
       # Step 5: Esegui la build del programma utilizzando il build-wrapper
+      # Ho corretto il comando di compilazione qui, usando 'gcc' invece di 'make'
       - name: Esegui build con build-wrapper
         shell: bash
         run: |
-          ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output make clean all
+          ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output gcc -o main main.c
       
       # Step 6: Analisi del codice con SonarCloud
       # Utilizza il token salvato come segreto del repository
