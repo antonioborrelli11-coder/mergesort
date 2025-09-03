@@ -24,19 +24,24 @@ jobs:
       - name: Installa gli strumenti di compilazione C
         run: sudo apt-get update && sudo apt-get install -y gcc make
 
-      # Step 3: Scarica e decomprimi il build-wrapper di SonarCloud
+      # Step 3: debug per vedere la struttura del tuo progetto
+      - name: Visualizza file del repository
+        run: ls -R
+
+      # Step 4: Scarica e decomprimi il build-wrapper di SonarCloud
       - name: Scarica build-wrapper
         shell: bash
         run: |
           wget https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
           unzip build-wrapper-linux-x86.zip
 
-      # Step 4: Esegui la build del programma utilizzando il build-wrapper
+      # Step 5: Esegui la build del programma utilizzando il build-wrapper
       - name: Esegui build con build-wrapper
         shell: bash
-        run: ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output gcc -o main main.c
+        run: |
+          ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output make clean all
       
-      # Step 5: Analisi del codice con SonarCloud
+      # Step 6: Analisi del codice con SonarCloud
       # Utilizza il token salvato come segreto del repository
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
