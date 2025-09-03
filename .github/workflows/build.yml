@@ -18,13 +18,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Installazione build-wrapper e dipendenze
+      # Step 2: Installazione gcc e build-wrapper
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential unzip wget
-
-          # scarica il build-wrapper da SonarCloud
           wget https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
           unzip build-wrapper-linux-x86.zip
           sudo mv build-wrapper-linux-x86/* /usr/local/bin/
@@ -34,12 +32,14 @@ jobs:
         run: |
           build-wrapper-linux-x86-64 --out-dir bw-output gcc main.c -o main
 
-      # Step 4: Esegui l’analisi SonarCloud
+      # Step 4: Analisi SonarCloud
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
             -Dsonar.projectKey=antonioborrelli11-coder_mergesort
             -Dsonar.organization=antonioborrelli11-coder
             -Dsonar.sources=.
-            -Dsonar.cfamily.compile-commands=bw-output/compile_commands.json
+            -Dsonar.cfamily.compile-commands
