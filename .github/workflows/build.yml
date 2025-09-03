@@ -1,58 +1,45 @@
-name: Build e Analisi SonarCloud
+name: C Build and SonarCloud Analysis
 
-# Questo workflow si attiva su ogni push e pull request sul branch 'main'
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
-# Un workflow può avere uno o più job. Qui ne definiamo uno chiamato 'build'.
 jobs:
   build:
-    # Specifica su quale tipo di macchina virtuale eseguire il job.
-    # 'ubuntu-latest' è la scelta più comune per i progetti C/C++.
+    name: Build and Analyze
     runs-on: ubuntu-latest
 
-    # I 'steps' sono i passaggi che il tuo job deve seguire in ordine.
     steps:
-      # Step 1: Clona il tuo codice dalla repository. Questo è sempre il primo passo.
-      - name: Checkout del Codice
-        uses: actions/checkout@v4
-      
-      # Step 2: Installa gli strumenti di compilazione C
-      - name: Installa gli strumenti di compilazione C
-        run: sudo apt-get update && sudo apt-get install -y gcc make
+      # Step 1: Checkout del codice
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      # Step 3: debug per vedere la struttura del tuo progetto
-      - name: Visualizza file del repository
-        run: ls -R
-
-      # Step 4: Scarica e decomprimi il build-wrapper di SonarCloud
-      - name: Scarica build-wrapper
-        shell: bash
+      # Step 2: Installazione build-wrapper e dipendenze
+      - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential unzip wget
+
+          # scarica il build-wrapper da SonarCloud
           wget https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
           unzip build-wrapper-linux-x86.zip
+          sudo mv build-wrapper-linux-x86/* /usr/local/bin/
 
-      # Step 5: Esegui la build del programma utilizzando il build-wrapper
-      # Ho corretto il comando di compilazione qui, usando 'gcc' invece di 'make'
-      - name: Esegui build con build-wrapper
-        shell: bash
+      # Step 3: Compilazione dentro il build-wrapper
+      - name: Build with build-wrapper
         run: |
-          rm -f main
-          ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output gcc -o main main.c
-      
-      # Step 6: Analisi del codice con SonarCloud
-      # Utilizza il token salvato come segreto del repository
+          build-wrapper-linux-x86-64 --out-dir bw-output gcc main.c -o main
+
+      # Step 4: Esegui l’analisi SonarCloud
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
             -Dsonar.projectKey=antonioborrelli11-coder_mergesort
             -Dsonar.organization=antonioborrelli11-coder
-            -Dsonar.cfamily.build-wrapper-output=bw-output
-            -Dsonar.sources=main.c
+            -Dsonar.sources=.
+            -Dsonar.cfamily.compile-commands=bw-output/compile_commands.json
