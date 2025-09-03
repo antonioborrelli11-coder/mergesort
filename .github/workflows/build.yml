@@ -1,4 +1,4 @@
-name: C Build and SonarCloud Analysis
+name: Build and Analyze
 
 on:
   push:
@@ -10,29 +10,25 @@ on:
 
 jobs:
   build:
-    name: Build and Analyze
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout del codice
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Installazione gcc e build-wrapper
       - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential unzip
+
+      - name: Download build-wrapper
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential unzip wget
-          wget https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+          curl -sSLo build-wrapper-linux-x86.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
           unzip build-wrapper-linux-x86.zip
           sudo mv build-wrapper-linux-x86/* /usr/local/bin/
 
-      # Step 3: Compilazione dentro il build-wrapper
       - name: Build with build-wrapper
         run: |
           build-wrapper-linux-x86-64 --out-dir bw-output gcc main.c -o main
 
-      # Step 4: Analisi SonarCloud
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:
@@ -42,4 +38,4 @@ jobs:
             -Dsonar.projectKey=antonioborrelli11-coder_mergesort
             -Dsonar.organization=antonioborrelli11-coder
             -Dsonar.sources=.
-            -Dsonar.cfamily.compile-commands
+            -Dsonar.cfamily.compile-commands=bw-output/compile_commands.json
