@@ -40,6 +40,7 @@ jobs:
       - name: Esegui build con build-wrapper
         shell: bash
         run: |
+          rm -f main
           ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output gcc -o main main.c
       
       # Step 6: Analisi del codice con SonarCloud
@@ -54,3 +55,4 @@ jobs:
             -Dsonar.projectKey=antonioborrelli11-coder_mergesort
             -Dsonar.organization=antonioborrelli11-coder
             -Dsonar.cfamily.build-wrapper-output=bw-output
+            -Dsonar.sources=main.c
